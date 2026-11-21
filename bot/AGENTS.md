@@ -9,7 +9,7 @@ rules live in [`../AGENTS.md`](../AGENTS.md); this file adds the rules for
 
 - Elixir 1.20 on Erlang/OTP 29
 - Phoenix 1.8 with LiveView 1.2, served by Bandit
-- Ash 3 with AshPostgres (PostgreSQL 16 or later) and AshPhoenix
+- Ash 3 with AshPostgres (PostgreSQL 18 or later) and AshPhoenix
 - Tailwind CSS v4 and esbuild, run as standalone binaries by the `:tailwind`
   and `:esbuild` Mix packages, so there is no Node.js toolchain or
   `package.json`

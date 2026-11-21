@@ -48,7 +48,7 @@ directories.
 | --- | --- |
 | Elixir | 1.20 |
 | Erlang/OTP | 29 |
-| PostgreSQL | 16 or later |
+| PostgreSQL | 18 or later |
 
 There is no pinned development environment in the repository yet. Install the
 versions above with your system's package manager.
