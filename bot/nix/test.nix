@@ -51,6 +51,7 @@
     )
     assert "root@example.com is now root." in output, output
     link = next(line.strip() for line in output.splitlines() if "/magic_link/" in line)
-    machine.succeed(f"curl --fail --silent '{link}' | grep -q 'Sign in to ShoddyBot'")
+    page = machine.succeed(f"curl --fail --silent '{link}'")
+    assert "Sign in to ShoddyBot" in page, page
   '';
 }
