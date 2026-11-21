@@ -208,8 +208,9 @@ helper of your own; their usage rules are at the end of this file.
 - Use `Shoddy.Tests` (`eventually/2`, `put_app_env/3`) in tests instead of
   `Process.sleep/1` and hand-restored config.
 - When either library has a bug or lacks something we need, do not work
-  around it silently in `bot/`. Write up the fix or enhancement for Rob, and
-  do not push to or open issues on those repositories without his approval.
+  around it silently in `bot/`. Write up the fix or enhancement and report it.
+  Do not push to or open issues on those repositories without approval from
+  their maintainer.
 
 ## LiveView composition
 

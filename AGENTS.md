@@ -75,6 +75,17 @@ project. Each project keeps its Nix expressions in its own `nix/` directory
   `nix build .#shoddybot`, and copy the hash Nix reports.
 - A new project adds `<project>/nix/shell.nix` and a `devShells` entry.
 
+## Writing
+
+- Write all code comments, documentation, descriptions, commit messages and
+  pull requests in ASD-STE100 Simplified Technical English. Use short
+  sentences, the active voice and one meaning for each word.
+- Do not use mannered prose: no idioms, figures of speech, filler or
+  decorative words.
+- Write rules as project rules. Do not name people or "the owner" as the
+  source of a rule. Write "Operators set up their own connections", not
+  "The maintainer wants operators to set up their own connections".
+
 ## Commits
 
 - Write the subject in the imperative mood, in 72 characters or fewer. Prefix

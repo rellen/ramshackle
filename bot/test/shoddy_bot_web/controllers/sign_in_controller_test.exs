@@ -26,14 +26,14 @@ defmodule ShoddyBotWeb.SignInControllerTest do
 
       conn =
         post(conn, ~p"/auth/user/magic_link/request", %{
-          "user" => %{"email" => "rob@example.com"}
+          "user" => %{"email" => "operator@example.com"}
         })
 
       assert redirected_to(conn) == ~p"/sign-in"
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "we sent it a sign-in link"
 
       assert_email_sent(fn email ->
-        assert email.to == [{"", "rob@example.com"}]
+        assert email.to == [{"", "operator@example.com"}]
         send(self(), {:magic_link_body, email.text_body})
       end)
 
@@ -52,10 +52,10 @@ defmodule ShoddyBotWeb.SignInControllerTest do
 
       assert {:ok, user} =
                ShoddyBot.Accounts.User
-               |> Ash.Query.for_read(:get_by_email, %{email: "rob@example.com"})
+               |> Ash.Query.for_read(:get_by_email, %{email: "operator@example.com"})
                |> Ash.read_one(authorize?: false)
 
-      assert to_string(user.email) == "rob@example.com"
+      assert to_string(user.email) == "operator@example.com"
 
       # The token is single use.
       conn = post(build_conn(), ~p"/auth/user/magic_link", %{"user" => %{"token" => token}})
