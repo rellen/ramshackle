@@ -57,7 +57,7 @@ config :shoddy_bot, ShoddyBotWeb.Endpoint,
 # different ports.
 
 # Enable dev routes for dashboard and mailbox
-config :shoddy_bot, dev_routes: true
+config :shoddy_bot, dev_routes: true, token_signing_secret: "4PRz9urqbEU/9+ycP+cl2o+A33e3/v6B"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"

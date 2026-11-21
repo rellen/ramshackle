@@ -14,6 +14,7 @@ defmodule ShoddyBot.Application do
       {Phoenix.PubSub, name: ShoddyBot.PubSub},
       # Start a worker by calling: ShoddyBot.Worker.start_link(arg)
       # {ShoddyBot.Worker, arg},
+      {AshAuthentication.Supervisor, [otp_app: :shoddy_bot]},
       # Start to serve requests, typically the last entry
       ShoddyBotWeb.Endpoint
     ]

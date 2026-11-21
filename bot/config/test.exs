@@ -1,5 +1,12 @@
 import Config
 
+config :shoddy_bot, token_signing_secret: "WEpJIUZaLAphjb91818+d66ugNP4Rl9E"
+
+config :shoddy_bot, :github,
+  client_id: "test-github-client-id",
+  client_secret: "test-github-client-secret",
+  redirect_uri: "http://localhost:4002/auth"
+
 config :ash,
   policies: [show_policy_breakdowns?: true],
   keyset_signing_secret: "9B6ZgMSaQ0gK6pW6EUpvvJyNqsAnfJSh89YHcga4JEQ",

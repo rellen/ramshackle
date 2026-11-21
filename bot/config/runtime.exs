@@ -38,6 +38,18 @@ if config_env() == :dev do
         ~r"lib/shoddy_bot_web/(controllers|live|components)/.*\.(ex|heex)$"E
       ]
     ]
+
+  # GitHub sign-in is optional in development. Without GITHUB_CLIENT_ID and
+  # GITHUB_CLIENT_SECRET the "Sign in with GitHub" link fails, and magic links
+  # still work. See README.md for creating a GitHub OAuth app.
+  config :shoddy_bot, :github,
+    client_id: System.get_env("GITHUB_CLIENT_ID"),
+    client_secret: System.get_env("GITHUB_CLIENT_SECRET"),
+    redirect_uri:
+      System.get_env(
+        "GITHUB_REDIRECT_URI",
+        "http://localhost:#{System.get_env("PORT", "4000")}/auth"
+      )
 end
 
 if config_env() == :prod do
@@ -94,6 +106,24 @@ if config_env() == :prod do
           raise("environment variable SECRET_KEY_BASE is missing"),
         "ash keyset signing"
       )
+
+  config :shoddy_bot,
+    token_signing_secret:
+      System.get_env("TOKEN_SIGNING_SECRET") ||
+        raise("""
+        environment variable TOKEN_SIGNING_SECRET is missing.
+        You can generate one by calling: mix phx.gen.secret
+        """),
+    mail_from: {"ShoddyBot", System.get_env("MAIL_FROM") || "noreply@#{host}"}
+
+  config :shoddy_bot, :github,
+    client_id:
+      System.get_env("GITHUB_CLIENT_ID") ||
+        raise("environment variable GITHUB_CLIENT_ID is missing"),
+    client_secret:
+      System.get_env("GITHUB_CLIENT_SECRET") ||
+        raise("environment variable GITHUB_CLIENT_SECRET is missing"),
+    redirect_uri: System.get_env("GITHUB_REDIRECT_URI") || "https://#{host}/auth"
 
   # ## SSL Support
   #

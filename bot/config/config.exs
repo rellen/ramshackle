@@ -34,6 +34,9 @@ config :spark,
     remove_parens?: true,
     "Ash.Resource": [
       section_order: [
+        :authentication,
+        :token,
+        :user_identity,
         :postgres,
         :resource,
         :code_interface,
@@ -56,7 +59,10 @@ config :spark,
 
 config :shoddy_bot,
   ecto_repos: [ShoddyBot.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime],
+  ash_domains: [ShoddyBot.Accounts],
+  ash_authentication: [return_error_on_invalid_magic_link_token?: true],
+  mail_from: {"ShoddyBot", "noreply@localhost"}
 
 # Configure the endpoint
 config :shoddy_bot, ShoddyBotWeb.Endpoint,
