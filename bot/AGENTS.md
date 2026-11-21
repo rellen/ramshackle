@@ -68,8 +68,10 @@ Development and test use PostgreSQL on `localhost` with user and password
 - Read config at the point of use (`ShoddyBot.Mailer`, `ShoddyBot.Secrets`),
   so changes apply without a restart.
 - Operator tasks live in `ShoddyBot.Release` and must work from
-  `bin/shoddy_bot eval` with no running node: the NixOS module and the
-  container turn Erlang distribution off, so `rpc` is not available.
+  `bin/shoddy_bot eval` with no running node, so they work before the server
+  is up. The NixOS module and the container run Erlang distribution on
+  loopback only (node `shoddybot@127.0.0.1`, cookie in a file the service
+  user owns), so `rpc` and `remote` also reach a running server.
 
 ## Sign-in
 

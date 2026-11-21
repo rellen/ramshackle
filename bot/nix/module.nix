@@ -35,9 +35,16 @@ let
     # The release writes its generated runtime configuration here. The
     # default, inside the release, is the read-only Nix store.
     RELEASE_TMP = "/run/shoddybot";
-    # A single node: no Erlang distribution, so no epmd or distribution port
-    # is opened. Override in `environment` to attach remote shells.
-    RELEASE_DISTRIBUTION = "none";
+    # Erlang distribution on loopback only, so `shoddybot-rpc` and
+    # `shoddybot-remote` can reach the running node. epmd and the
+    # distribution listener bind 127.0.0.1, and the node is named by IP so
+    # nothing depends on how the host name resolves. The cookie is created
+    # on first start, readable by the service user only.
+    RELEASE_DISTRIBUTION = "name";
+    RELEASE_NODE = "shoddybot@127.0.0.1";
+    RELEASE_COOKIE_FILE = "/var/lib/shoddybot/cookie";
+    ERL_EPMD_ADDRESS = "127.0.0.1";
+    ELIXIR_ERL_OPTIONS = "-kernel inet_dist_use_interface {127,0,0,1}";
     LANG = "C.UTF-8";
   }
   // lib.optionalAttrs (cfg.database.url != null) { DATABASE_URL = cfg.database.url; }
@@ -52,36 +59,78 @@ let
     exec "$@"
   '';
 
-  # `shoddybot-eval EXPR` runs an Elixir expression with
-  # `bin/shoddy_bot eval`, as the service user, with the service's
-  # environment and master key, in a transient systemd unit. Erlang
-  # distribution is off, so `rpc` cannot reach the running server; `eval`
-  # starts only what the expression needs. Used to onboard root.
-  evalEnvironment = environment // {
-    RELEASE_TMP = "/run/shoddybot-eval";
+  # Admin commands that run `bin/shoddy_bot` as the service user, with the
+  # service's environment, in a transient systemd unit:
+  #
+  # - `shoddybot-eval EXPR` starts a fresh VM with only what EXPR needs, so
+  #   it works whether or not the server is running. Used to onboard root.
+  # - `shoddybot-rpc EXPR` runs EXPR inside the running server.
+  # - `shoddybot-remote` opens an IEx shell on the running server.
+  #
+  # rpc and remote reach the server over loopback Erlang distribution with
+  # the cookie in /var/lib/shoddybot/cookie.
+  adminEnvironment = environment // {
+    RELEASE_TMP = "/run/shoddybot-admin";
   };
 
-  shoddybotEval = pkgs.writeShellScriptBin "shoddybot-eval" ''
-    set -euo pipefail
-    if [ "$#" -ne 1 ]; then
-      echo "usage: shoddybot-eval 'ShoddyBot.Release.create_root(\"you@example.com\", public_url: \"https://shoddybot.example.com\")'" >&2
-      exit 64
-    fi
-    exec ${config.systemd.package}/bin/systemd-run --quiet --wait --pipe --collect \
-      --uid=${cfg.database.user} --gid=${cfg.database.user} \
-      --property=LoadCredential=master_key:${cfg.masterKeyFile} \
-      --property=RuntimeDirectory=shoddybot-eval \
-      --property=WorkingDirectory=/var/lib/shoddybot \
-      ${
-        lib.optionalString (cfg.environmentFile != null) "--property=EnvironmentFile=${cfg.environmentFile}"
-      } \
-      ${
-        lib.concatStringsSep " " (
-          lib.mapAttrsToList (name: value: lib.escapeShellArg "--setenv=${name}=${value}") evalEnvironment
-        )
-      } \
-      -- ${withSecrets} ${cfg.package}/bin/shoddy_bot eval "$1"
-  '';
+  releaseCommand =
+    {
+      name,
+      usage,
+      command,
+      args,
+      systemdRunFlags,
+    }:
+    pkgs.writeShellScriptBin name ''
+      set -euo pipefail
+      ${lib.optionalString (usage != null) ''
+        if [ "$#" -ne 1 ]; then
+          echo ${lib.escapeShellArg "usage: ${name} ${usage}"} >&2
+          exit 64
+        fi
+      ''}
+      exec ${config.systemd.package}/bin/systemd-run --quiet --wait --collect ${systemdRunFlags} \
+        --uid=${cfg.database.user} --gid=${cfg.database.user} \
+        --property=LoadCredential=master_key:${cfg.masterKeyFile} \
+        --property=StateDirectory=shoddybot \
+        --property=RuntimeDirectory=shoddybot-admin \
+        --property=WorkingDirectory=/var/lib/shoddybot \
+        ${
+          lib.optionalString (cfg.environmentFile != null) "--property=EnvironmentFile=${cfg.environmentFile}"
+        } \
+        ${
+          lib.concatStringsSep " " (
+            lib.mapAttrsToList (name: value: lib.escapeShellArg "--setenv=${name}=${value}") adminEnvironment
+          )
+        } \
+        -- ${withSecrets} ${cfg.package}/bin/shoddy_bot ${command} ${args}
+    '';
+
+  rootExample = "'ShoddyBot.Release.create_root(\"you@example.com\", public_url: \"https://shoddybot.example.com\")'";
+
+  adminCommands = [
+    (releaseCommand {
+      name = "shoddybot-eval";
+      usage = rootExample;
+      command = "eval";
+      args = ''"$1"'';
+      systemdRunFlags = "--pipe";
+    })
+    (releaseCommand {
+      name = "shoddybot-rpc";
+      usage = "'IO.inspect(node())'";
+      command = "rpc";
+      args = ''"$1"'';
+      systemdRunFlags = "--pipe";
+    })
+    (releaseCommand {
+      name = "shoddybot-remote";
+      usage = null;
+      command = "remote";
+      args = "";
+      systemdRunFlags = "--pty";
+    })
+  ];
 in
 {
   # These moved into the database, where root manages them in the admin pages.
@@ -159,6 +208,9 @@ in
         `shoddybot-eval`, which this module installs:
 
             shoddybot-eval 'ShoddyBot.Release.create_root("you@example.com", public_url: "https://shoddybot.example.com")'
+
+        `shoddybot-rpc EXPR` and `shoddybot-remote` reach the running server
+        over Erlang distribution on 127.0.0.1.
       '';
     };
 
@@ -268,7 +320,7 @@ in
 
     networking.firewall.allowedTCPPorts = optional cfg.openFirewall cfg.port;
 
-    environment.systemPackages = [ shoddybotEval ];
+    environment.systemPackages = adminCommands;
 
     systemd.services.shoddybot = {
       description = "ShoddyBot server";

@@ -60,9 +60,15 @@ dockerTools.buildLayeredImage {
       "LANG=C.UTF-8"
       "PORT=4000"
       "RELEASE_TMP=/tmp"
-      # A single node: no Erlang distribution, so no epmd or distribution
-      # port is opened in the container.
-      "RELEASE_DISTRIBUTION=none"
+      # Erlang distribution on loopback only, so `docker exec <container>
+      # shoddy_bot rpc ...` and `shoddy_bot remote` reach the server, and
+      # nothing listens outside the container. The cookie is created on first
+      # start and shared through /tmp.
+      "RELEASE_DISTRIBUTION=name"
+      "RELEASE_NODE=shoddybot@127.0.0.1"
+      "RELEASE_COOKIE_FILE=/tmp/shoddybot-cookie"
+      "ERL_EPMD_ADDRESS=127.0.0.1"
+      "ELIXIR_ERL_OPTIONS=-kernel inet_dist_use_interface {127,0,0,1}"
       "SSL_CERT_FILE=${cacert}/etc/ssl/certs/ca-bundle.crt"
     ];
     Labels = {

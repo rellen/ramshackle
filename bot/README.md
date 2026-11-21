@@ -69,7 +69,11 @@ bin/shoddy_bot eval 'ShoddyBot.Release.sign_in_link("you@example.com")'
 ```
 
 `eval` starts only the database connection and the vault, so it works
-while the server is running and without Erlang distribution. In
+whether or not the server is running. The NixOS module and the container
+also run Erlang distribution on loopback, so `bin/shoddy_bot rpc` and
+`bin/shoddy_bot remote` reach a running server (on NixOS, use the
+`shoddybot-eval`, `shoddybot-rpc` and `shoddybot-remote` commands the module
+installs). In
 development, call the same functions from `iex -S mix phx.server`.
 
 ## Signing in
@@ -153,6 +157,11 @@ Then onboard root as the machine's root user. `shoddybot-eval` runs
 shoddybot-eval 'ShoddyBot.Release.create_root("you@example.com", public_url: "https://shoddybot.example.com")'
 ```
 
+`shoddybot-rpc EXPR` runs an expression inside the running server, and
+`shoddybot-remote` opens an IEx shell on it. They connect over Erlang
+distribution, which listens on 127.0.0.1 only, with a cookie the module
+creates in `/var/lib/shoddybot/cookie` on first start.
+
 By default the module creates a local PostgreSQL database and role, connects
 over the Unix socket, and runs migrations before each start. Set
 `services.shoddybot.database.createLocally = false` and provide a
@@ -176,7 +185,9 @@ docker run --name shoddybot -p 4000:4000 \
 docker exec shoddybot shoddy_bot eval 'ShoddyBot.Release.create_root("you@example.com", public_url: "https://shoddybot.example.com")'
 ```
 
-The entrypoint runs migrations, then starts the server. The database role
+The entrypoint runs migrations, then starts the server. `docker exec shoddybot
+shoddy_bot rpc EXPR` and `docker exec -it shoddybot shoddy_bot remote` reach
+the running server over Erlang distribution on the container's loopback. The database role
 needs to be able to create the `citext` extension, which the database owner
 can do, and to create schemas, one per tenant.
 

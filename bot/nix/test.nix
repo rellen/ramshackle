@@ -38,7 +38,14 @@
       "sudo -u postgres psql -d shoddybot -tAc 'SELECT count(*) FROM instance_boot_secrets' | grep -q '^1$'"
     )
 
-    # Onboard root without email, with distribution off.
+    # Distribution listens on loopback only, and rpc reaches the server.
+    machine.succeed("ss -ltnH '( sport = :4369 )' | grep -q '127.0.0.1:4369'")
+    machine.fail("ss -ltnpH | grep -E 'beam|epmd' | grep -v -E '127\\.0\\.0\\.1:|\\[::1\\]:|:4000 '")
+    output = machine.succeed("shoddybot-rpc 'IO.puts(node())'")
+    assert "shoddybot@127.0.0.1" in output, output
+    machine.succeed("stat -c '%U %a' /var/lib/shoddybot/cookie | grep -q '^shoddybot 600$'")
+
+    # Onboard root without email.
     output = machine.succeed(
       "shoddybot-eval 'ShoddyBot.Release.create_root(\"root@example.com\", public_url: \"http://localhost:4000\")'"
     )
