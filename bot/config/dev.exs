@@ -30,7 +30,7 @@ config :shoddy_bot, ShoddyBotWeb.Endpoint,
   secret_key_base: "bXfd8bFX4ixqqY5glJlj6VAidyOIMvll9yjmOuse13kM8AGUBVO2pXKGfG4xWWQS",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:shoddy_bot, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:shoddy_bot, ~w(--watch)]}
+    esbuild_css: {Esbuild, :install_and_run, [:shoddy_bot_css, ~w(--sourcemap=inline --watch)]}
   ]
 
 # ## SSL Support

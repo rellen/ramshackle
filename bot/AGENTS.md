@@ -10,9 +10,9 @@ rules live in [`../AGENTS.md`](../AGENTS.md); this file adds the rules for
 - Elixir 1.20 on Erlang/OTP 29
 - Phoenix 1.8 with LiveView 1.2, served by Bandit
 - Ash 3 with AshPostgres (PostgreSQL 18 or later) and AshPhoenix
-- Tailwind CSS v4 and esbuild, run as standalone binaries by the `:tailwind`
-  and `:esbuild` Mix packages, so there is no Node.js toolchain or
-  `package.json`
+- Layered, classless CSS and homegrown components, with no CSS framework
+- esbuild, run as a standalone binary by the `:esbuild` Mix package, bundles
+  `app.js` and `app.css`, so there is no Node.js toolchain or `package.json`
 
 ## Layout
 
@@ -104,13 +104,33 @@ against repositories and hosts. Treat every change as security-sensitive.
 - If you get errors about a missing `current_scope` assign, the route is in the
   wrong `live_session`, or `current_scope` was not passed to `<Layouts.app>`.
   Fix the routing rather than working around the assign.
-- Use `<.icon name="hero-x-mark" class="size-5" />` from `core_components.ex`
-  for icons, never `Heroicons` modules.
-- Use `<.input>` from `core_components.ex` for form inputs. Passing `class`
-  replaces the default classes, so a custom `class` must style the input
-  completely.
+- There is no icon library. When a component needs an icon, add an inline
+  SVG with `aria-hidden="true"` and keep a text label or `aria-label` beside
+  it.
+- Use `<.input>` from `core_components.ex` for form inputs. It links errors to
+  the control with `aria-invalid` and `aria-describedby`.
 - Use `Req` for HTTP requests. Do not add `:httpoison`, `:tesla` or use
   `:httpc`.
+
+## LiveView composition
+
+- Never use LiveComponents (`Phoenix.LiveComponent`, `<.live_component>`).
+  This overrides the generated Phoenix rules below, which only say to avoid
+  them.
+- When a LiveView needs a reusable piece of UI, reach for these in order:
+  1. **Function components.** Stateless markup in a module that uses
+     `Phoenix.Component`. The parent LiveView owns all state and handles the
+     events.
+  2. **Live widgets.** A function component for the markup, paired with a
+     module that attaches the widget's state and event handling to the host
+     LiveView with `Phoenix.LiveView.attach_hook/4` (`:handle_event`,
+     `:handle_info`, `:handle_params`), usually from an `on_mount` callback.
+     Namespace the widget's assigns and event names so several widgets can
+     share one LiveView, and return `{:cont, socket}` for events that are not
+     the widget's.
+  3. **Nested LiveViews** (`live_render/3`), only when the piece needs its
+     own process: independent failure, its own PubSub subscriptions, or
+     heavy work that must not block the parent.
 
 ## HTML, CSS and accessibility
 
@@ -135,10 +155,26 @@ against repositories and hosts. Treat every change as security-sensitive.
   `<script :type={Phoenix.LiveView.ColocatedHook} name=".MyHook" extension="ts">`.
   Standalone client modules under `assets/js/` are `.ts` files too. esbuild
   strips the types when bundling but does not type-check.
-- Style with Tailwind v4 utility classes and plain CSS. Build our own
-  components rather than using daisyUI's. Never use `@apply`.
-- Tailwind v4 has no `tailwind.config.js`. Keep the `@import "tailwindcss"
-  source(none);` and `@source` lines in `assets/css/app.css` as generated.
+- Never add Tailwind, daisyUI or any other CSS framework or utility-class
+  library. Write layered, classless CSS and build every component ourselves.
+- `assets/css/app.css` declares the cascade layers in order (`reset`,
+  `tokens`, `base`, `layout`, `components`, `colocated`) and imports one file
+  into each. Put a rule in the lowest layer that fits. Never use
+  `!important` to win a fight between layers; move the rule instead.
+- Do not put `class` attributes in templates. Style elements by what they are
+  (`base.css`), landmarks by their place in the page (`layout.css`), and
+  components by a `data-*` attribute on their root, such as `data-flash`
+  (`components.css`). Variants and state use attributes too:
+  `data-variant="primary"`, `aria-invalid`, `aria-pressed`, `[hidden]`.
+- Use the custom properties in `tokens.css` for colour, type, space, radius
+  and motion rather than literal values. Colours use `light-dark()`, so a new
+  colour token needs both a light and a dark value.
+- Component-specific CSS can live next to its markup as colocated CSS, which
+  lands in the `colocated` layer. That needs a module that uses
+  `Phoenix.LiveView.ColocatedCSS` (none exists yet; prefer a scoped one using
+  `@scope`), and the `<style :type={...}>` tag must open its template.
+- The generated Phoenix rules below mention Tailwind classes. Ignore those
+  parts; the rules in this file win.
 - Only the `app.js` and `app.css` bundles are served. Import vendored code into
   them. Never link external scripts or stylesheets from layouts. The only
   `<script>` tags allowed in templates are colocated hooks, which are
