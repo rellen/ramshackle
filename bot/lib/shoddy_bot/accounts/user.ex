@@ -1,0 +1,137 @@
+defmodule ShoddyBot.Accounts.User do
+  use Ash.Resource,
+    otp_app: :shoddy_bot,
+    domain: ShoddyBot.Accounts,
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer],
+    extensions: [AshAuthentication]
+
+  authentication do
+    add_ons do
+      log_out_everywhere do
+        apply_on_password_change? true
+      end
+    end
+
+    tokens do
+      enabled? true
+      token_resource ShoddyBot.Accounts.Token
+      signing_secret ShoddyBot.Secrets
+      store_all_tokens? true
+      require_token_presence_for_authentication? true
+    end
+
+    strategies do
+      magic_link do
+        identity_field :email
+        registration_enabled? true
+        require_interaction? true
+
+        sender ShoddyBot.Accounts.User.Senders.SendMagicLinkEmail
+      end
+
+      github do
+        client_id ShoddyBot.Secrets
+        client_secret ShoddyBot.Secrets
+        redirect_uri ShoddyBot.Secrets
+        identity_resource ShoddyBot.Accounts.UserIdentity
+      end
+
+      remember_me :remember_me
+    end
+  end
+
+  postgres do
+    table "users"
+    repo ShoddyBot.Repo
+  end
+
+  actions do
+    defaults [:read]
+
+    read :get_by_subject do
+      description "Get a user by the subject claim in a JWT"
+      argument :subject, :string, allow_nil?: false
+      get? true
+      prepare AshAuthentication.Preparations.FilterBySubject
+    end
+
+    read :get_by_email do
+      description "Looks up a user by their email"
+      get_by :email
+    end
+
+    create :sign_in_with_magic_link do
+      description "Sign in or register a user with magic link."
+
+      argument :token, :string do
+        description "The token from the magic link that was sent to the user"
+        allow_nil? false
+      end
+
+      argument :remember_me, :boolean do
+        description "Whether to generate a remember me token"
+        allow_nil? true
+      end
+
+      upsert? true
+      upsert_identity :unique_email
+      upsert_fields [:email]
+
+      # Uses the information from the token to create or sign in the user
+      change AshAuthentication.Strategy.MagicLink.SignInChange
+
+      change {AshAuthentication.Strategy.RememberMe.MaybeGenerateTokenChange,
+              strategy_name: :remember_me}
+
+      metadata :token, :string do
+        allow_nil? false
+      end
+    end
+
+    create :register_with_github do
+      description "Sign in or register a user with GitHub."
+
+      argument :user_info, :map, allow_nil?: false
+      argument :oauth_tokens, :map, allow_nil?: false, sensitive?: true
+
+      upsert? true
+      upsert_identity :unique_email
+      # A returning user keeps the email they registered with.
+      upsert_fields []
+
+      # Must run first: it rejects unverified GitHub emails before the
+      # identity is resolved or linked.
+      change ShoddyBot.Accounts.User.Changes.SetEmailFromGithub
+      change AshAuthentication.GenerateTokenChange
+      change AshAuthentication.Strategy.OAuth2.IdentityChange
+    end
+
+    action :request_magic_link do
+      argument :email, :ci_string do
+        allow_nil? false
+      end
+
+      run AshAuthentication.Strategy.MagicLink.Request
+    end
+  end
+
+  policies do
+    bypass AshAuthentication.Checks.AshAuthenticationInteraction do
+      authorize_if always()
+    end
+  end
+
+  attributes do
+    uuid_primary_key :id
+
+    attribute :email, :ci_string do
+      allow_nil? false
+      public? true
+    end
+  end
+
+  identities do
+    identity :unique_email, [:email]
+  end
+end

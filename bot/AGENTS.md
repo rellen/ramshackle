@@ -45,7 +45,9 @@ rules live in [`../AGENTS.md`](../AGENTS.md); this file adds the rules for
 Development and test use PostgreSQL on `localhost` with user and password
 `postgres` (`config/dev.exs`, `config/test.exs`). Production reads everything
 from environment variables in `config/runtime.exs` (`DATABASE_URL`,
-`SECRET_KEY_BASE`, `PHX_HOST`, `PORT`, `PHX_SERVER`).
+`SECRET_KEY_BASE`, `TOKEN_SIGNING_SECRET`, `GITHUB_CLIENT_ID`,
+`GITHUB_CLIENT_SECRET` and others). README.md lists them all; keep that list
+current when you add one.
 
 ## Definition of done
 

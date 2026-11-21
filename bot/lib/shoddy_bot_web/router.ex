@@ -1,6 +1,10 @@
 defmodule ShoddyBotWeb.Router do
   use ShoddyBotWeb, :router
 
+  use AshAuthentication.Phoenix.Router
+
+  import AshAuthentication.Plug.Helpers
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -8,16 +12,44 @@ defmodule ShoddyBotWeb.Router do
     plug :put_root_layout, html: {ShoddyBotWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :load_from_session
   end
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug :load_from_bearer
+    plug :set_actor, :user
+  end
+
+  scope "/", ShoddyBotWeb do
+    pipe_through :browser
+
+    ash_authentication_live_session :authenticated_routes do
+      # in each liveview, add one of the following at the top of the module:
+      #
+      # If an authenticated user must be present:
+      # on_mount {ShoddyBotWeb.LiveUserAuth, :live_user_required}
+      #
+      # If an authenticated user *may* be present:
+      # on_mount {ShoddyBotWeb.LiveUserAuth, :live_user_optional}
+      #
+      # If an authenticated user must *not* be present:
+      # on_mount {ShoddyBotWeb.LiveUserAuth, :live_no_user}
+    end
   end
 
   scope "/", ShoddyBotWeb do
     pipe_through :browser
 
     get "/", PageController, :home
+
+    # Callbacks and form targets for the magic link and GitHub strategies,
+    # under /auth/user/...
+    auth_routes AuthController, ShoddyBot.Accounts.User, path: "/auth"
+
+    get "/sign-in", SignInController, :new
+    get "/magic_link/:token", SignInController, :magic_link
+    delete "/sign-out", AuthController, :sign_out
   end
 
   # Other scopes may use custom stacks.
