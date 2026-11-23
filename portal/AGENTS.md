@@ -247,8 +247,8 @@ helper of your own; their usage rules are at the end of this file.
   to restate native semantics. A `<div>` with a `role` is never a substitute
   for a `<button>`.
 - Every form control has a visible `<label>`. Errors must be linked to their
-  control with `aria-invalid` and `aria-describedby`. The generated `<.input>`
-  does not do this yet: fix it once in `core_components.ex`, not form by form.
+  control with `aria-invalid` and `aria-describedby`. `<.input>` does this. If
+  you write a control by hand, link its errors in the same way.
 - Everything works by keyboard alone, and focus is always visible. Never remove
   focus outlines without a replacement.
 - Meet WCAG 2.2 AA contrast. Never show state with colour alone. Respect
