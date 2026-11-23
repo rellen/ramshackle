@@ -1,9 +1,9 @@
-# ShoddyBot server (`bot/`)
+# ShoddyBot server (`portal/`)
 
 The ShoddyBot server: a self-hosted Ash + Phoenix application that manages
 software repositories and the applications running from them. Monorepo-wide
 rules live in [`../AGENTS.md`](../AGENTS.md); this file adds the rules for
-`bot/`. Run every command below from `bot/`.
+`portal/`. Run every command below from `portal/`.
 
 ## Stack
 
@@ -188,7 +188,7 @@ against repositories and hosts. Treat every change as security-sensitive.
 
 ## Shoddy and ShoddyPhoenix
 
-`bot/` depends on [Shoddy](https://github.com/rellen/shoddy) and
+`portal/` depends on [Shoddy](https://github.com/rellen/shoddy) and
 [ShoddyPhoenix](https://github.com/rellen/shoddy_phoenix), small helper
 libraries from the same author as ShoddyBot. Reach for them before writing a
 helper of your own; their usage rules are at the end of this file.
@@ -208,7 +208,7 @@ helper of your own; their usage rules are at the end of this file.
 - Use `Shoddy.Tests` (`eventually/2`, `put_app_env/3`) in tests instead of
   `Process.sleep/1` and hand-restored config.
 - When either library has a bug or lacks something we need, do not work
-  around it silently in `bot/`. Write up the fix or enhancement and report it.
+  around it silently in `portal/`. Write up the fix or enhancement and report it.
   Do not push to or open issues on those repositories without approval from
   their maintainer.
 

@@ -9,7 +9,7 @@ and agent instructions.
 
 | Directory | What it is | Stack | Instructions |
 | --- | --- | --- | --- |
-| [`bot/`](bot/) | The ShoddyBot server and web UI | Elixir, Ash, Phoenix, PostgreSQL | [`bot/AGENTS.md`](bot/AGENTS.md) |
+| [`portal/`](portal/) | The ShoddyBot server and web UI | Elixir, Ash, Phoenix, PostgreSQL | [`portal/AGENTS.md`](portal/AGENTS.md) |
 
 Other clients, such as mobile apps, will be added as further top-level
 directories.
@@ -51,27 +51,27 @@ directories.
 | PostgreSQL | 17 or later |
 
 The root `flake.nix` pins these versions. With Nix (flakes enabled), run
-`nix develop .#bot` from the repository root for a shell with the `bot/`
+`nix develop .#portal` from the repository root for a shell with the `portal/`
 toolchain, or install the versions above with your system's package manager.
 
 ## Nix
 
 `flake.nix` is the one piece of root tooling, because it serves every
 project. Each project keeps its Nix expressions in its own `nix/` directory
-(`bot/nix/`), and the flake wires them together:
+(`portal/nix/`), and the flake wires them together:
 
 | Output | What it is |
 | --- | --- |
-| `packages.<system>.shoddybot` (`default`) | The `bot/` Mix release |
+| `packages.<system>.shoddybot` (`default`) | The `portal/` Mix release |
 | `packages.<linux>.container` | OCI image of the release |
 | `nixosModules.shoddybot` (`default`) | `services.shoddybot` |
-| `devShells.<system>.bot` (`default`) | Toolchain for `bot/` |
+| `devShells.<system>.portal` (`default`) | Toolchain for `portal/` |
 | `checks.<system>.*` | Package and image builds, Nix formatting, and a NixOS VM test of the module |
 
 - Run `nix flake check` after changing anything under `nix/`, `flake.nix`
   or `flake.lock`, and `nix fmt` to format Nix files.
-- When `bot/mix.lock` changes, update the `hash` of `mixFodDeps` in
-  `bot/nix/package.nix`: set it to `lib.fakeHash`, run
+- When `portal/mix.lock` changes, update the `hash` of `mixFodDeps` in
+  `portal/nix/package.nix`: set it to `lib.fakeHash`, run
   `nix build .#shoddybot`, and copy the hash Nix reports.
 - A new project adds `<project>/nix/shell.nix` and a `devShells` entry.
 
@@ -94,7 +94,7 @@ project. Each project keeps its Nix expressions in its own `nix/` directory
 - In the body, explain why the change was made. The diff already shows what
   changed.
 - Never commit secrets, credentials or `.env` files. A deployment supplies a
-  few bootstrap environment variables (see `bot/README.md`); everything else
+  few bootstrap environment variables (see `portal/README.md`); everything else
   is configured in the app and stored encrypted in its database.
 
 ## License

@@ -31,27 +31,27 @@
       packages =
         lib.recursiveUpdate
           (forSystems systems (pkgs: rec {
-            shoddybot = pkgs.callPackage ./bot/nix/package.nix {
+            shoddybot = pkgs.callPackage ./portal/nix/package.nix {
               beamPackages = beamPackagesFor pkgs.beam_minimal;
             };
             default = shoddybot;
           }))
           (
             forSystems linuxSystems (pkgs: {
-              container = pkgs.callPackage ./bot/nix/container.nix {
+              container = pkgs.callPackage ./portal/nix/container.nix {
                 shoddybot = self.packages.${pkgs.stdenv.hostPlatform.system}.shoddybot;
               };
             })
           );
 
       nixosModules = rec {
-        shoddybot = import ./bot/nix/module.nix { inherit self; };
+        shoddybot = import ./portal/nix/module.nix { inherit self; };
         default = shoddybot;
       };
 
       devShells = forSystems systems (pkgs: rec {
-        bot = pkgs.callPackage ./bot/nix/shell.nix { beamPackages = beamPackagesFor pkgs.beam; };
-        default = bot;
+        portal = pkgs.callPackage ./portal/nix/shell.nix { beamPackages = beamPackagesFor pkgs.beam; };
+        default = portal;
       });
 
       checks =
@@ -67,7 +67,7 @@
           (
             forSystems linuxSystems (pkgs: {
               inherit (self.packages.${pkgs.stdenv.hostPlatform.system}) container;
-              nixos-module = pkgs.testers.runNixOSTest (import ./bot/nix/test.nix { inherit self; });
+              nixos-module = pkgs.testers.runNixOSTest (import ./portal/nix/test.nix { inherit self; });
             })
           );
 

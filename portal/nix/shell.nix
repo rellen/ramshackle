@@ -1,4 +1,4 @@
-# Development shell for bot/: the Erlang/OTP and Elixir versions from
+# Development shell for portal/: the Erlang/OTP and Elixir versions from
 # AGENTS.md, PostgreSQL, and esbuild, which the Mix project would otherwise
 # download.
 {

@@ -11,7 +11,7 @@
 # The entrypoint runs pending migrations, then starts the server. The release
 # commands are on PATH, so root is onboarded with
 # `docker exec <container> shoddy_bot eval 'ShoddyBot.Release.create_root(...)'`;
-# see bot/README.md.
+# see portal/README.md.
 {
   lib,
   dockerTools,
