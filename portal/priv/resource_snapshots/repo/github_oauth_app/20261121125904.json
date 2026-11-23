@@ -83,7 +83,7 @@
     "global": null,
     "strategy": null
   },
-  "repo": "Elixir.ShoddyBot.Repo",
+  "repo": "Elixir.Ramshackle.Repo",
   "schema": null,
   "table": "github_oauth_app",
   "temporal": null

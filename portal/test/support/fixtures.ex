@@ -1,11 +1,11 @@
-defmodule ShoddyBot.Fixtures do
+defmodule Ramshackle.Fixtures do
   @moduledoc "Builds records for tests, skipping authorization."
 
-  alias ShoddyBot.Accounts.User
-  alias ShoddyBot.Tenancy
+  alias Ramshackle.Accounts.User
+  alias Ramshackle.Tenancy
 
   def user(email \\ unique_email()) do
-    {:ok, user} = ShoddyBot.Accounts.ensure_user(email)
+    {:ok, user} = Ramshackle.Accounts.ensure_user(email)
     user
   end
 

@@ -71,7 +71,7 @@
     "global": null,
     "strategy": null
   },
-  "repo": "Elixir.ShoddyBot.Repo",
+  "repo": "Elixir.Ramshackle.Repo",
   "schema": null,
   "table": "instance_boot_secrets",
   "temporal": null

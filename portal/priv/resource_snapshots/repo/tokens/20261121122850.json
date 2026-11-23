@@ -98,7 +98,7 @@
     "global": null,
     "strategy": null
   },
-  "repo": "Elixir.ShoddyBot.Repo",
+  "repo": "Elixir.Ramshackle.Repo",
   "schema": null,
   "table": "tokens",
   "temporal": null

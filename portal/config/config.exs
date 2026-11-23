@@ -59,21 +59,21 @@ config :spark,
     "Ash.Domain": [section_order: [:resources, :policies, :authorization, :domain, :execution]]
   ]
 
-config :shoddy_bot,
-  ecto_repos: [ShoddyBot.Repo],
+config :ramshackle,
+  ecto_repos: [Ramshackle.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [ShoddyBot.Accounts, ShoddyBot.Instance, ShoddyBot.Tenancy],
+  ash_domains: [Ramshackle.Accounts, Ramshackle.Instance, Ramshackle.Tenancy],
   ash_authentication: [return_error_on_invalid_magic_link_token?: true]
 
 # Configure the endpoint
-config :shoddy_bot, ShoddyBotWeb.Endpoint,
+config :ramshackle, RamshackleWeb.Endpoint,
   url: [host: "localhost"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
-    formats: [html: ShoddyBotWeb.ErrorHTML, json: ShoddyBotWeb.ErrorJSON],
+    formats: [html: RamshackleWeb.ErrorHTML, json: RamshackleWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: ShoddyBot.PubSub,
+  pubsub_server: Ramshackle.PubSub,
   live_view: [signing_salt: "p66KWx+z"]
 
 # Configure LiveView
@@ -82,7 +82,7 @@ config :phoenix_live_view,
   root_tag_attribute: "phx-r"
 
 # Mail goes through the provider root configures in the admin pages (see
-# ShoddyBot.Mailer). Development and test set a fallback adapter.
+# Ramshackle.Mailer). Development and test set a fallback adapter.
 config :swoosh, :api_client, Swoosh.ApiClient.Req
 
 # Configure esbuild (the version is required). It bundles both app.js and
@@ -92,13 +92,13 @@ config :esbuild,
   # Use an existing esbuild binary instead of downloading one when set, for
   # example by the Nix build and dev shell.
   path: System.get_env("MIX_ESBUILD_PATH"),
-  shoddy_bot: [
+  ramshackle: [
     args:
       ~w(js/app.js --bundle --target=es2022 --outdir=../priv/static/assets/js --external:/fonts/* --external:/images/* --alias:@=.),
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
   ],
-  shoddy_bot_css: [
+  ramshackle_css: [
     args:
       ~w(css/app.css --bundle --outdir=../priv/static/assets/css --external:/fonts/* --external:/images/*),
     cd: Path.expand("../assets", __DIR__),

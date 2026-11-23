@@ -1,6 +1,6 @@
 import Config
 
-config :shoddy_bot, token_signing_secret: "WEpJIUZaLAphjb91818+d66ugNP4Rl9E"
+config :ramshackle, token_signing_secret: "WEpJIUZaLAphjb91818+d66ugNP4Rl9E"
 
 config :ash,
   policies: [show_policy_breakdowns?: true],
@@ -12,26 +12,26 @@ config :ash,
 # The MIX_TEST_PARTITION environment variable can be used
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
-config :shoddy_bot, ShoddyBot.Repo,
+config :ramshackle, Ramshackle.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  database: "shoddy_bot_test#{System.get_env("MIX_TEST_PARTITION")}",
+  database: "ramshackle_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
-config :shoddy_bot, ShoddyBotWeb.Endpoint,
+config :ramshackle, RamshackleWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
   secret_key_base: "CflAseZ0eO/7P0YDfs8mSE6IWlhPtiQRlajwgCajBxrUtGHlX+jMX0PqKmeV3p3E",
   server: false
 
 # In test we don't send emails
-config :shoddy_bot, ShoddyBot.Mailer, adapter: Swoosh.Adapters.Test
+config :ramshackle, Ramshackle.Mailer, adapter: Swoosh.Adapters.Test
 
-config :shoddy_bot, boot_secrets: :config
-config :shoddy_bot, ShoddyBot.Vault, key: "aENpb8aZGlJKGgjCRjMHZQsb26UwWrez0r9oSnsVRdw="
+config :ramshackle, boot_secrets: :config
+config :ramshackle, Ramshackle.Vault, key: "aENpb8aZGlJKGgjCRjMHZQsb26UwWrez0r9oSnsVRdw="
 
 # Print only warnings and errors during test
 config :logger, level: :warning

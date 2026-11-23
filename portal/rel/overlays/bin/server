@@ -3,4 +3,4 @@
 set -euo pipefail
 
 cd -P -- "$(dirname -- "$0")"
-PHX_SERVER=true exec ./shoddy_bot start
+PHX_SERVER=true exec ./ramshackle start

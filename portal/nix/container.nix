@@ -1,16 +1,16 @@
-# OCI image of the ShoddyBot server, for Docker, Podman and similar.
+# OCI image of the Ramshackle server, for Docker, Podman and similar.
 #
 #   nix build .#container
 #   docker load < result
 #   docker run --rm -p 4000:4000 \
-#     -e DATABASE_URL=ecto://user:pass@db/shoddybot \
-#     -e SHODDYBOT_MASTER_KEY=... \
-#     shoddybot:<version>
+#     -e DATABASE_URL=ecto://user:pass@db/ramshackle \
+#     -e RAMSHACKLE_MASTER_KEY=... \
+#     ramshackle:<version>
 #
 # Generate the master key once with `openssl rand -base64 32` and keep it.
 # The entrypoint runs pending migrations, then starts the server. The release
 # commands are on PATH, so root is onboarded with
-# `docker exec <container> shoddy_bot eval 'ShoddyBot.Release.create_root(...)'`;
+# `docker exec <container> ramshackle eval 'Ramshackle.Release.create_root(...)'`;
 # see portal/README.md.
 {
   lib,
@@ -18,28 +18,28 @@
   writeShellApplication,
   runCommand,
   cacert,
-  shoddybot,
+  ramshackle,
 }:
 
 let
-  # Puts the release command on PATH as `shoddy_bot`, for `docker exec`. The
+  # Puts the release command on PATH as `ramshackle`, for `docker exec`. The
   # script resolves the symlink to find the release.
-  releaseCommands = runCommand "shoddybot-commands" { } ''
+  releaseCommands = runCommand "ramshackle-commands" { } ''
     mkdir -p $out/bin
-    ln -s ${lib.getBin shoddybot}/bin/shoddy_bot $out/bin/shoddy_bot
+    ln -s ${lib.getBin ramshackle}/bin/ramshackle $out/bin/ramshackle
   '';
 
   entrypoint = writeShellApplication {
-    name = "shoddybot-entrypoint";
+    name = "ramshackle-entrypoint";
     text = ''
-      ${lib.getBin shoddybot}/bin/migrate
-      exec ${lib.getBin shoddybot}/bin/server
+      ${lib.getBin ramshackle}/bin/migrate
+      exec ${lib.getBin ramshackle}/bin/server
     '';
   };
 in
 dockerTools.buildLayeredImage {
-  name = "shoddybot";
-  tag = shoddybot.version;
+  name = "ramshackle";
+  tag = ramshackle.version;
 
   contents = [
     dockerTools.fakeNss
@@ -61,20 +61,20 @@ dockerTools.buildLayeredImage {
       "PORT=4000"
       "RELEASE_TMP=/tmp"
       # Erlang distribution on loopback only, so `docker exec <container>
-      # shoddy_bot rpc ...` and `shoddy_bot remote` reach the server, and
+      # ramshackle rpc ...` and `ramshackle remote` reach the server, and
       # nothing listens outside the container. The cookie is created on first
       # start and shared through /tmp.
       "RELEASE_DISTRIBUTION=name"
-      "RELEASE_NODE=shoddybot@127.0.0.1"
-      "RELEASE_COOKIE_FILE=/tmp/shoddybot-cookie"
+      "RELEASE_NODE=ramshackle@127.0.0.1"
+      "RELEASE_COOKIE_FILE=/tmp/ramshackle-cookie"
       "ERL_EPMD_ADDRESS=127.0.0.1"
       "ELIXIR_ERL_OPTIONS=-kernel inet_dist_use_interface {127,0,0,1}"
       "SSL_CERT_FILE=${cacert}/etc/ssl/certs/ca-bundle.crt"
     ];
     Labels = {
-      "org.opencontainers.image.source" = "https://github.com/rellen/shoddybot";
+      "org.opencontainers.image.source" = "https://github.com/rellen/ramshackle";
       "org.opencontainers.image.licenses" = "Apache-2.0";
-      "org.opencontainers.image.version" = shoddybot.version;
+      "org.opencontainers.image.version" = ramshackle.version;
     };
   };
 }

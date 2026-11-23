@@ -1,18 +1,27 @@
-# ShoddyBot
+# Ramshackle
 
-ShoddyBot is a self-hosted application for managing software repositories and
-the live applications running from them. This repository is a monorepo: each
-top-level directory is a separate project with its own toolchain, dependencies
-and agent instructions.
+Ramshackle is a self-hosted system that runs software bots on code
+repositories and the applications that run from them. It has three parts:
+
+1. The portal: the developer portal and control plane. It holds users,
+   roles, tenants, instance configuration and the admin UI.
+2. ShoddyBot: the bot framework. Bots use agent SDKs (for example the
+   Claude Agent SDK) and connect to services such as GitHub, Linear and
+   Slack.
+3. The runners: the framework that runs bots on infrastructure. An operator
+   uses a built-in runner (for example Fly Sprites) or supplies a runner.
+
+This repository is a monorepo: each top-level directory is a separate project
+with its own toolchain, dependencies and agent instructions.
 
 ## Projects
 
 | Directory | What it is | Stack | Instructions |
 | --- | --- | --- | --- |
-| [`portal/`](portal/) | The ShoddyBot server and web UI | Elixir, Ash, Phoenix, PostgreSQL | [`portal/AGENTS.md`](portal/AGENTS.md) |
+| [`portal/`](portal/) | The portal: control plane server and web UI | Elixir, Ash, Phoenix, PostgreSQL | [`portal/AGENTS.md`](portal/AGENTS.md) |
 
-Other clients, such as mobile apps, will be added as further top-level
-directories.
+The bot framework (`shoddybot/`) and the runners (`runners/`) get their own
+top-level directories when work on them starts.
 
 ## How to work in this repository
 
@@ -20,7 +29,7 @@ directories.
   conventions and definition of done. Where it conflicts with this file, the
   project's file wins inside that project.
 - Run build, test and generator commands from inside the project directory
-  (for example `cd bot && mix test`). Nothing builds from the repository root.
+  (for example `cd portal && mix test`). Nothing builds from the repository root.
 - Keep each change inside one project where you can. If a change crosses
   projects (for example an API the server exposes and a client consumes),
   update both sides in the same change, and update the server's tests for the
@@ -62,9 +71,9 @@ project. Each project keeps its Nix expressions in its own `nix/` directory
 
 | Output | What it is |
 | --- | --- |
-| `packages.<system>.shoddybot` (`default`) | The `portal/` Mix release |
+| `packages.<system>.ramshackle` (`default`) | The `portal/` Mix release |
 | `packages.<linux>.container` | OCI image of the release |
-| `nixosModules.shoddybot` (`default`) | `services.shoddybot` |
+| `nixosModules.ramshackle` (`default`) | `services.ramshackle` |
 | `devShells.<system>.portal` (`default`) | Toolchain for `portal/` |
 | `checks.<system>.*` | Package and image builds, Nix formatting, and a NixOS VM test of the module |
 
@@ -72,7 +81,7 @@ project. Each project keeps its Nix expressions in its own `nix/` directory
   or `flake.lock`, and `nix fmt` to format Nix files.
 - When `portal/mix.lock` changes, update the `hash` of `mixFodDeps` in
   `portal/nix/package.nix`: set it to `lib.fakeHash`, run
-  `nix build .#shoddybot`, and copy the hash Nix reports.
+  `nix build .#ramshackle`, and copy the hash Nix reports.
 - A new project adds `<project>/nix/shell.nix` and a `devShells` entry.
 
 ## Writing
@@ -90,7 +99,7 @@ project. Each project keeps its Nix expressions in its own `nix/` directory
 
 - Write the subject in the imperative mood, in 72 characters or fewer. Prefix
   it with the project directory when the change is confined to one project:
-  `bot: add repository resource`.
+  `portal: add repository resource`.
 - In the body, explain why the change was made. The diff already shows what
   changed.
 - Never commit secrets, credentials or `.env` files. A deployment supplies a

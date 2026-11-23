@@ -5,11 +5,11 @@ config :ash,
   keyset_signing_secret: "G3PIGSRnzWcg+IScAzPHkxOKNeI2cq1ICkI7v92SCYg"
 
 # Configure your database
-config :shoddy_bot, ShoddyBot.Repo,
+config :ramshackle, Ramshackle.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  database: "shoddy_bot_dev",
+  database: "ramshackle_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -20,7 +20,7 @@ config :shoddy_bot, ShoddyBot.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we can use it
 # to bundle .js and .css sources.
-config :shoddy_bot, ShoddyBotWeb.Endpoint,
+config :ramshackle, RamshackleWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {127, 0, 0, 1}],
@@ -29,8 +29,8 @@ config :shoddy_bot, ShoddyBotWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "bXfd8bFX4ixqqY5glJlj6VAidyOIMvll9yjmOuse13kM8AGUBVO2pXKGfG4xWWQS",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:shoddy_bot, ~w(--sourcemap=inline --watch)]},
-    esbuild_css: {Esbuild, :install_and_run, [:shoddy_bot_css, ~w(--sourcemap=inline --watch)]}
+    esbuild: {Esbuild, :install_and_run, [:ramshackle, ~w(--sourcemap=inline --watch)]},
+    esbuild_css: {Esbuild, :install_and_run, [:ramshackle_css, ~w(--sourcemap=inline --watch)]}
   ]
 
 # ## SSL Support
@@ -57,7 +57,7 @@ config :shoddy_bot, ShoddyBotWeb.Endpoint,
 # different ports.
 
 # Enable dev routes for dashboard and mailbox
-config :shoddy_bot, dev_routes: true, token_signing_secret: "4PRz9urqbEU/9+ycP+cl2o+A33e3/v6B"
+config :ramshackle, dev_routes: true, token_signing_secret: "4PRz9urqbEU/9+ycP+cl2o+A33e3/v6B"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"
@@ -79,9 +79,9 @@ config :phoenix_live_view,
 
 # Without a mail provider configured in the admin pages, mail lands in the
 # mailbox preview at /dev/mailbox.
-config :shoddy_bot, ShoddyBot.Mailer, adapter: Swoosh.Adapters.Local
+config :ramshackle, Ramshackle.Mailer, adapter: Swoosh.Adapters.Local
 
 # Local-only secrets. Production generates its own on first boot and keeps
-# them in the database, encrypted with SHODDYBOT_MASTER_KEY.
-config :shoddy_bot, boot_secrets: :config
-config :shoddy_bot, ShoddyBot.Vault, key: "GGusNfdbOdAKuDxKPqRGbJxS3Ec+W61IC1bfm7OzaTo="
+# them in the database, encrypted with RAMSHACKLE_MASTER_KEY.
+config :ramshackle, boot_secrets: :config
+config :ramshackle, Ramshackle.Vault, key: "GGusNfdbOdAKuDxKPqRGbJxS3Ec+W61IC1bfm7OzaTo="

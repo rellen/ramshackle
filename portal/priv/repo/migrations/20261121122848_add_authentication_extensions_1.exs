@@ -1,4 +1,4 @@
-defmodule ShoddyBot.Repo.Migrations.AddAuthenticationExtensions1 do
+defmodule Ramshackle.Repo.Migrations.AddAuthenticationExtensions1 do
   @moduledoc """
   Installs any extensions that are mentioned in the repo's `installed_extensions/0` callback
 

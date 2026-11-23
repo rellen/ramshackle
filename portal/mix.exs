@@ -1,9 +1,9 @@
-defmodule ShoddyBot.MixProject do
+defmodule Ramshackle.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :shoddy_bot,
+      app: :ramshackle,
       version: "0.1.0",
       elixir: "~> 1.20",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -46,7 +46,7 @@ defmodule ShoddyBot.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {ShoddyBot.Application, []},
+      mod: {Ramshackle.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -115,10 +115,10 @@ defmodule ShoddyBot.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ash.setup --quiet", "test"],
       "assets.setup": ["esbuild.install --if-missing"],
-      "assets.build": ["compile", "esbuild shoddy_bot", "esbuild shoddy_bot_css"],
+      "assets.build": ["compile", "esbuild ramshackle", "esbuild ramshackle_css"],
       "assets.deploy": [
-        "esbuild shoddy_bot --minify",
-        "esbuild shoddy_bot_css --minify",
+        "esbuild ramshackle --minify",
+        "esbuild ramshackle_css --minify",
         "phx.digest"
       ],
       precommit: [

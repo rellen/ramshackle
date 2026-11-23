@@ -1,4 +1,4 @@
-defmodule ShoddyBot.Repo.Migrations.AddAuthentication do
+defmodule Ramshackle.Repo.Migrations.AddAuthentication do
   @moduledoc """
   Updates resources based on their most recent snapshots.
 
